@@ -1,0 +1,9 @@
+CREATE TYPE employee_status AS ENUM ('ACTIVE', 'INACTIVE', 'ON_LEAVE');
+
+CREATE TABLE employees (
+    id UUID PRIMARY KEY UNIQUE NOT NULL,
+    user_id UUID REFERENCES users(id),
+    status employee_status DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
