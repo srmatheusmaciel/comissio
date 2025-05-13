@@ -13,23 +13,33 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "comission_configuration")
-@Data
+@Table(name = "performed_service")
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 @Builder
-public class ComissionConfig {
+public class PerformedService {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "service_type_id")
-    private ServiceType serviceType;
+    @JoinColumn(name = "employee_id", nullable = false)
+    private Employee employee;
 
-    @Column(name = "default_percentage", nullable = false)
-    private BigDecimal defaultPercentage;
+    @ManyToOne
+    @JoinColumn(name = "service_type_id", nullable = false)
+    private ServiceType serviceTypeId;
+
+    @Column(nullable = false)
+    private BigDecimal price;
+
+    @Column(name="comission_amount", nullable = false)
+    private BigDecimal comissionAmount;
+
+    @Enumerated(EnumType.STRING)
+    private ServiceStatus status;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
@@ -38,6 +48,5 @@ public class ComissionConfig {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
 
 }
