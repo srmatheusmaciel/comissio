@@ -1,0 +1,6 @@
+CREATE TABLE audit_logs (
+    id UUID PRIMARY KEY,
+    user_id UUID, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    event_type VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
