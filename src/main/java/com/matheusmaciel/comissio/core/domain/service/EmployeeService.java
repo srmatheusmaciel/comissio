@@ -5,6 +5,9 @@ import com.matheusmaciel.comissio.core.domain.model.register.Employee;
 import com.matheusmaciel.comissio.core.domain.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 public class EmployeeService {
 
@@ -17,14 +20,15 @@ public class EmployeeService {
     }
 
     public Employee execute(Employee employee) {
-        if (employee.getUser() == null || employee.getUser().getId() == null) {
-            throw new IllegalArgumentException("User ID cannot be null.");
-        }
+        UUID userId = Optional.ofNullable(employee.getUser())
+                .map(User::getId)
+                .orElseThrow(() -> new IllegalArgumentException("User ID cannot be null."));
 
-        User user = this.userService.findById(employee.getUser().getId());
-        employee.setUser(user);
+        User user = this.userService.findById(userId);
+        employee.setUser(user); // garante que virá do banco
 
         return this.employeeRepository.save(employee);
     }
+
 
 }
