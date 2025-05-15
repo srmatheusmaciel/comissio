@@ -22,7 +22,7 @@ public class EmployeeController {
     @PostMapping("/")
     public ResponseEntity<Object> create(@Valid @RequestBody Employee employee) {
         try {
-            // Verificar se o 'User' foi corretamente atribuído ao 'Employee'
+
             if (employee.getUser() == null || employee.getUser().getId() == null) {
                 return ResponseEntity.badRequest().body("User ID cannot be null.");
             }
