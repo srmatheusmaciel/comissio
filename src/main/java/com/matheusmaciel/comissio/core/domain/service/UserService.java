@@ -8,6 +8,7 @@ import com.matheusmaciel.comissio.core.domain.model.access.User;
 import com.matheusmaciel.comissio.core.domain.model.access.UserRole;
 import com.matheusmaciel.comissio.core.domain.repository.UserRepository;
 import com.matheusmaciel.comissio.infra.exception.UserFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -55,6 +56,12 @@ public class UserService {
                 .updatedAt(saved.getUpdatedAt())
                 .build();
     }
+
+    public User findById(UUID id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+    }
+
 
 
 
