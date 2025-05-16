@@ -83,6 +83,17 @@ public class User implements UserDetails {
         return UserDetails.super.isAccountNonLocked();
     }
 
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+
 
 
 
