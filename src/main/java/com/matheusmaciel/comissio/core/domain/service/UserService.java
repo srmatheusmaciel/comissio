@@ -20,41 +20,9 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
 
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.authenticationManager = authenticationManager;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    public UserResponseDTO createUser(UserRequestDTO dto) {
-        this.userRepository
-                .findByUsernameOrEmail(dto.getUsername(), dto.getEmail())
-                .ifPresent(u -> {
-                    throw new UserFoundException();
-                });
-
-        var user = User.builder()
-                .name(dto.getName())
-                .username(dto.getUsername())
-                .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .role(UserRole.valueOf(dto.getRole().toUpperCase()))
-                .build();
-
-        var saved = this.userRepository.save(user);
-
-        return UserResponseDTO.builder()
-                .id(saved.getId())
-                .name(saved.getName())
-                .username(saved.getUsername())
-                .email(saved.getEmail())
-                .role(saved.getRole().name())
-                .createdAt(saved.getCreatedAt())
-                .updatedAt(saved.getUpdatedAt())
-                .build();
     }
 
     public User findById(UUID id) {
