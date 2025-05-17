@@ -45,43 +45,60 @@ public class User implements UserDetails {
     @Length(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private UserRole role;
 
+
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
 
-    public User(String username, String password, UserRole role) {
+    public User(String name, String username, String email, String password, UserRole role) {
+        this.name = name;
         this.username = username;
+        this.email = email;
         this.password = password;
         this.role = role;
     }
+    
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
+        return switch (this.role) {
+            case ADMIN -> List.of(
+                new SimpleGrantedAuthority("ROLE_ADMIN"),
+                new SimpleGrantedAuthority("ROLE_MANAGER"),
+                new SimpleGrantedAuthority("ROLE_EMPLOYEE")
+            );
+            case MANAGER -> List.of(
+                new SimpleGrantedAuthority("ROLE_MANAGER"),
+                new SimpleGrantedAuthority("ROLE_EMPLOYEE")
+            );
+            case EMPLOYEE -> List.of(
+                new SimpleGrantedAuthority("ROLE_EMPLOYEE")
+            );
+        };
     }
+
 
     @Override
     public String getUsername() {
-        return this.username;
+        return username;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        return true;
     }
+
 
     @Override
     public boolean isCredentialsNonExpired() {
