@@ -1,11 +1,10 @@
 package com.matheusmaciel.comissio.infra.config;
 
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import io.swagger.v3.oas.models.OpenAPI;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 
 @Configuration
 public class SwaggerConfig {
@@ -16,6 +15,7 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("Comission System API")
                         .version("1.0")
-                        .description("Documentation for Comission System API"));
+                        .description("Documentation for Comission System API")
+                        );
     }
 }
