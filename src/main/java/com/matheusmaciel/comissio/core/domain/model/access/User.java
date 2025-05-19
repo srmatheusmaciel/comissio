@@ -49,11 +49,11 @@ public class User implements UserDetails {
 
 
     @CreationTimestamp
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", insertable = false, updatable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public User(String name, String username, String email, String password, UserRole role) {
