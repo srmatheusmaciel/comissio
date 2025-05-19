@@ -6,6 +6,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     private final SecurityFilter securityFilter;
@@ -21,22 +23,33 @@ public class SecurityConfig {
         this.securityFilter = securityFilter;
     }
 
+    private static final String[] SWAGGER_LIST = {
+        "/v3/api-docs/**",
+        "/swagger-ui/**",
+        "/swagger-ui.html",
+        "/webjars/**",
+        "/favicon.ico"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-       return http
-                .csrf(csrf -> csrf.disable())
+
+        http.csrf(csrf -> csrf.disable());
+        http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/users/login").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> { auth
+                        .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers(SWAGGER_LIST).permitAll();
+
+                auth.anyRequest().authenticated();
+    })
                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+;
 
 
-
+                return http.build();
 
 
     }
