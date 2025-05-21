@@ -5,6 +5,8 @@ import com.matheusmaciel.comissio.core.domain.dto.employee.EmployeeResponseDTO;
 import com.matheusmaciel.comissio.core.domain.model.access.User;
 import com.matheusmaciel.comissio.core.domain.model.register.Employee;
 import com.matheusmaciel.comissio.core.domain.repository.EmployeeRepository;
+import com.matheusmaciel.comissio.infra.exception.employee.EmployeeFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -21,7 +23,13 @@ public class EmployeeService {
         this.userService = userService;
     }
 
+    @Transactional
     public EmployeeResponseDTO registerEmployee(EmployeeRequestDTO dto) {
+
+
+        if (employeeRepository.existsByUser_Id(dto.userId())) {
+            throw new EmployeeFoundException();
+        }
 
         User user = this.userService.findById(dto.userId());
 
