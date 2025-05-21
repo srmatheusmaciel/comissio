@@ -28,7 +28,6 @@ public class Employee {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Enumerated(EnumType.STRING)
     private StatusEmployee status;
 
     @CreationTimestamp

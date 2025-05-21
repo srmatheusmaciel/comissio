@@ -34,13 +34,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
 
-        http.csrf(csrf -> csrf.disable());
+
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> { auth
                         .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users/list").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/employee/register").hasRole("ADMIN")
                         .requestMatchers(SWAGGER_LIST).permitAll();
 
                 auth.anyRequest().authenticated();
@@ -49,7 +51,7 @@ public class SecurityConfig {
 ;
 
 
-                return http.build();
+        return http.build();
 
 
     }

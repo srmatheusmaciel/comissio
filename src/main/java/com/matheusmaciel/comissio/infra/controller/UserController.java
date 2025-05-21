@@ -1,6 +1,6 @@
 package com.matheusmaciel.comissio.infra.controller;
 
-import com.matheusmaciel.comissio.core.domain.dto.AuthenticationRequestDTO;
+import com.matheusmaciel.comissio.core.domain.dto.LoginRequestDTO;
 import com.matheusmaciel.comissio.core.domain.dto.LoginResponseDTO;
 import com.matheusmaciel.comissio.core.domain.dto.UserRequestDTO;
 import com.matheusmaciel.comissio.core.domain.model.access.User;
@@ -49,7 +49,7 @@ public class UserController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity login(@Valid @RequestBody AuthenticationRequestDTO data) {
+  public ResponseEntity login(@Valid @RequestBody LoginRequestDTO data) {
     var usernamePassword = new UsernamePasswordAuthenticationToken(data.username(),
                                                                 data.password());
     var auth = this.authenticationManager.authenticate(usernamePassword);

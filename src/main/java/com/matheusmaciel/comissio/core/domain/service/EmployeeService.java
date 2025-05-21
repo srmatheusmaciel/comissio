@@ -1,5 +1,7 @@
 package com.matheusmaciel.comissio.core.domain.service;
 
+import com.matheusmaciel.comissio.core.domain.dto.employee.EmployeeRequestDTO;
+import com.matheusmaciel.comissio.core.domain.dto.employee.EmployeeResponseDTO;
 import com.matheusmaciel.comissio.core.domain.model.access.User;
 import com.matheusmaciel.comissio.core.domain.model.register.Employee;
 import com.matheusmaciel.comissio.core.domain.repository.EmployeeRepository;
@@ -19,15 +21,26 @@ public class EmployeeService {
         this.userService = userService;
     }
 
-    public Employee execute(Employee employee) {
-        UUID userId = Optional.ofNullable(employee.getUser())
-                .map(User::getId)
-                .orElseThrow(() -> new IllegalArgumentException("User ID cannot be null."));
+    public EmployeeResponseDTO registerEmployee(EmployeeRequestDTO dto) {
 
-        User user = this.userService.findById(userId);
-        employee.setUser(user); // garante que virá do banco
+        User user = this.userService.findById(dto.userId());
 
-        return this.employeeRepository.save(employee);
+
+        Employee employee = Employee.builder()
+                .user(user)
+                .status(dto.status())
+                .build();
+
+
+        Employee savedEmployee = this.employeeRepository.save(employee);
+
+        return new EmployeeResponseDTO(
+                savedEmployee.getId(),
+                savedEmployee.getUser().getId(),
+                savedEmployee.getStatus(),
+                savedEmployee.getCreated_at(),
+                savedEmployee.getUpdated_at()
+        );
     }
 
 
