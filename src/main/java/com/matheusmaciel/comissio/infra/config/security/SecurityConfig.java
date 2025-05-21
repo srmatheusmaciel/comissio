@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/list").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/employee/register").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/employee/list").hasRole("ADMIN")
                         .requestMatchers(SWAGGER_LIST).permitAll();
 
                 auth.anyRequest().authenticated();
