@@ -42,10 +42,19 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> { auth
                         .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+                        // .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/register").hasRole("ADMIN") // If the register is only for admin
                         .requestMatchers(HttpMethod.GET, "/users/list").hasRole("ADMIN")
+
+
                         .requestMatchers(HttpMethod.POST, "/employees").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/employees/list").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/employees").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/employees/{id}").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/employees/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/employees/{id}/status").hasAnyRole("ADMIN", "MANAGER")
+
+
+
                         .requestMatchers(SWAGGER_LIST).permitAll();
 
                 auth.anyRequest().authenticated();

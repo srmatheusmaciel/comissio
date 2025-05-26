@@ -7,6 +7,7 @@ import com.matheusmaciel.comissio.core.domain.model.access.User;
 import com.matheusmaciel.comissio.core.domain.repository.UserRepository;
 import com.matheusmaciel.comissio.infra.config.security.TokenService;
 
+import com.matheusmaciel.comissio.infra.exception.BusinessException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.matheusmaciel.comissio.core.domain.dto.UserResponseDTO;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -60,7 +63,7 @@ public class UserController {
   }
 
 
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
   @Tag(name = "Users", description = "Users register")
   @Operation(summary = "Register a new user", description = "This endpoint registers a new user in the system")
   @ApiResponses({
@@ -71,14 +74,16 @@ public class UserController {
   @SecurityRequirement(name = "jwt_auth")
   @PostMapping("/register")
   public ResponseEntity register(@Valid @RequestBody UserRequestDTO data) {
-    if(this.repository.findByUsername(data.username()) != null){
 
-      return ResponseEntity.badRequest().body("User already exists");
-    }
 
-    if(data.password() == null){
-      return ResponseEntity.badRequest().body("Password cannot be null");
-    }
+    repository.findByUsername(data.username())
+            .ifPresent(u -> { throw new BusinessException("Username already exists"); });
+
+    repository.findByEmail(data.email())
+            .ifPresent(e -> { throw new BusinessException("Email already exists"); });
+
+    Optional.ofNullable(data.password())
+            .orElseThrow(() -> new BusinessException("Password cannot be null"));
 
     String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
                                    
@@ -95,7 +100,7 @@ public class UserController {
   }
 
   @GetMapping("/list")
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
   @Tag(name = "Users", description = "Users list")
   @Operation(summary = "List all users", description = "This endpoint lists all users in the system")
   @ApiResponses({
