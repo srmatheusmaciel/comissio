@@ -1,18 +1,14 @@
 package com.matheusmaciel.comissio.infra.controller;
 
-import com.matheusmaciel.comissio.core.domain.dto.UserResponseDTO;
 import com.matheusmaciel.comissio.core.domain.dto.employee.EmployeeRequestDTO;
 import com.matheusmaciel.comissio.core.domain.dto.employee.EmployeeResponseDTO;
 import com.matheusmaciel.comissio.core.domain.dto.employee.EmployeeUpdateRequestDTO;
-import com.matheusmaciel.comissio.core.domain.model.register.Employee;
-import com.matheusmaciel.comissio.core.domain.repository.EmployeeRepository;
 import com.matheusmaciel.comissio.core.domain.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,7 +17,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.boot.autoconfigure.jersey.JerseyProperties.Servlet;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +41,7 @@ public class EmployeeController {
     @ApiResponse(responseCode = "400", description = "Invalid input data (bad request)")
     @ApiResponse(responseCode = "409", description = "User already exists")
     @SecurityRequirement(name = "jwt_auth")
+    @PostMapping("/")
     public ResponseEntity<EmployeeResponseDTO> create(@Valid @RequestBody EmployeeRequestDTO dto) {
 
         EmployeeResponseDTO response = employeeService.registerEmployee(dto);
@@ -60,7 +56,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/list")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN, ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Tag(name = "Employees", description = "Employees list")
     @Operation(summary = "List all employees", description = "This endpoint lists all employees in the system")
     @ApiResponse(responseCode = "200", description = "List of employees",
@@ -72,7 +68,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN, ROLE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Tag(name = "Employees", description = "Employees list")
     @Operation(summary = "List employees by id", description = "This endpoint search employees by id in the system")
     @ApiResponse(responseCode = "200", description = "Employee found",
@@ -85,7 +81,7 @@ public class EmployeeController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Tag(name = "Employees", description = "Employees update status")
     @Operation(summary = "Update status employee", description = "This endpoint update status employee in the system")
     @ApiResponse(responseCode = "200", description = "Employee updated",
