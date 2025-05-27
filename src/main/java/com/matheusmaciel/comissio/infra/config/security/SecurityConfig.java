@@ -54,6 +54,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/employees/{id}/status").hasAnyRole("ADMIN", "MANAGER")
 
 
+                        .requestMatchers(HttpMethod.POST, "/comission-configs").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/comission-configs/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/comission-configs/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/comission-configs/**").hasAnyRole("ADMIN", "MANAGER")
+
+                        .requestMatchers(HttpMethod.POST, "/employee-comissions/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/employee-comissions/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/employee-comissions/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/employee-comissions/**").hasRole("ADMIN")
+
 
                         .requestMatchers(SWAGGER_LIST).permitAll();
 
