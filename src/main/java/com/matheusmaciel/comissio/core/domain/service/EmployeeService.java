@@ -9,11 +9,10 @@ import com.matheusmaciel.comissio.core.domain.repository.EmployeeRepository;
 import com.matheusmaciel.comissio.infra.exception.employee.EmployeeFoundException;
 import com.matheusmaciel.comissio.infra.exception.employee.EmployeeNotFoundException;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 

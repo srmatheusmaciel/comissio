@@ -1,16 +1,26 @@
 package com.matheusmaciel.comissio.infra.controller;
 
+import com.matheusmaciel.comissio.core.domain.dto.ServiceType.ServiceTypeRequestDTO;
+import com.matheusmaciel.comissio.core.domain.dto.ServiceType.ServiceTypeResponseDTO;
 import com.matheusmaciel.comissio.core.domain.model.register.ServiceType;
 import com.matheusmaciel.comissio.core.domain.service.ServiceTypeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/service-types")
+@Tag(name = "Service Types", description = "Operations for managing service types")
 public class ServiceTypeController {
 
     private final ServiceTypeService serviceTypeService;
@@ -19,14 +29,63 @@ public class ServiceTypeController {
         this.serviceTypeService = serviceTypeService;
     }
 
-    @PostMapping("/")
-    public ResponseEntity<Object> create(@Valid @RequestBody ServiceType serviceType) {
-        try {
-            var result = this.serviceTypeService.execute(serviceType);
-            return ResponseEntity.ok().body(result);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Create a new service type")
+    @ApiResponse(responseCode = "201", description = "Service type created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid input data")
+    @ApiResponse(responseCode = "409", description = "Service type name already exists")
+    @SecurityRequirement(name = "jwt_auth")
+    public ResponseEntity<ServiceTypeResponseDTO> create(@Valid @RequestBody ServiceTypeRequestDTO dto) {
+       ServiceTypeResponseDTO createdServiceType = this.serviceTypeService.createServiceType(dto);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest().path("/{id}")
+                .buildAndExpand(createdServiceType.id())
+                .toUri();
+        return ResponseEntity.created(location).body(createdServiceType);
+
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @Operation(summary = "Get a service type by ID")
+    @ApiResponse(responseCode = "200", description = "Service type found")
+    @ApiResponse(responseCode = "404", description = "Service type not found")
+    @SecurityRequirement(name = "jwt_auth")
+    public ResponseEntity<ServiceTypeResponseDTO> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(serviceTypeService.getServiceTypeById(id));
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @Operation(summary = "List all service types")
+    @ApiResponse(responseCode = "200", description = "List of service types retrieved")
+    @SecurityRequirement(name = "jwt_auth")
+    public ResponseEntity<List<ServiceTypeResponseDTO>> getAll() {
+        return ResponseEntity.ok(serviceTypeService.getAllServiceTypes());
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Update an existing service type")
+    @ApiResponse(responseCode = "200", description = "Service type updated successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid input data")
+    @ApiResponse(responseCode = "404", description = "Service type not found")
+    @ApiResponse(responseCode = "409", description = "Service type name already in use by another service")
+    @SecurityRequirement(name = "jwt_auth")
+    public ResponseEntity<ServiceTypeResponseDTO> update(@PathVariable UUID id, @Valid @RequestBody ServiceTypeRequestDTO dto) {
+        return ResponseEntity.ok(serviceTypeService.updateServiceType(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete a service type by ID")
+    @ApiResponse(responseCode = "204", description = "Service type deleted successfully")
+    @ApiResponse(responseCode = "404", description = "Service type not found")
+    @SecurityRequirement(name = "jwt_auth")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        serviceTypeService.deleteServiceType(id);
+        return ResponseEntity.noContent().build();
     }
 
 
