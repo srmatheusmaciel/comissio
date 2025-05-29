@@ -1,5 +1,6 @@
 package com.matheusmaciel.comissio.core.domain.model.register;
 
+import com.matheusmaciel.comissio.infra.config.ServiceStatusConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -38,8 +40,12 @@ public class PerformedService {
     @Column(name="comission_amount", nullable = false)
     private BigDecimal comissionAmount;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ServiceStatusConverter.class)
+    @Column(name = "status", nullable = false)
     private ServiceStatus status;
+
+    @Column(name = "service_date", nullable = false)
+    private LocalDate serviceDate;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
