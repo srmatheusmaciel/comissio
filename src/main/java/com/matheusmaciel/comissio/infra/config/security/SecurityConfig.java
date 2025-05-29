@@ -53,6 +53,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/employees/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/employees/{id}/status").hasAnyRole("ADMIN", "MANAGER")
 
+                        .requestMatchers(HttpMethod.POST, "/service-types").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/service-types").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/service-types/{id}").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/service-types/{id}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/service-types/{id}").hasRole("ADMIN")
+
 
                         .requestMatchers(HttpMethod.POST, "/comission-configs").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/comission-configs/**").hasRole("ADMIN")
@@ -63,6 +69,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/employee-comissions/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.GET, "/employee-comissions/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.DELETE, "/employee-comissions/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/performed-services").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/performed-services").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/performed-services/{id}").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/performed-services/{id}").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.PATCH, "/performed-services/{id}/cancel").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/performed-services/{id}").hasRole("ADMIN")
 
 
                         .requestMatchers(SWAGGER_LIST).permitAll();
