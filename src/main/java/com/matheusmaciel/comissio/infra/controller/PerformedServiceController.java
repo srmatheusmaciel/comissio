@@ -3,6 +3,7 @@ package com.matheusmaciel.comissio.infra.controller;
 import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServiceRequestDTO;
 import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServiceResponseDTO;
 import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServiceUpdateRequestDTO;
+import com.matheusmaciel.comissio.core.domain.model.register.ServiceStatus;
 import com.matheusmaciel.comissio.core.domain.service.PerformedServiceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,14 +11,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
@@ -91,11 +95,19 @@ public class PerformedServiceController {
             description = "Returns a paginated list of all registered services." +
                     "You can control pagination and sorting using the parameters:" +
                     " page, size, and sort (e.g. sort=serviceDate,desc).")
+    @PageableAsQueryParam
     @ApiResponse(responseCode = "200", description = "List of performed services retrieved")
-    public ResponseEntity<Page<PerformedServiceResponseDTO>> getAllPerformedServices(@Parameter(hidden = true)
-                                                                                         Pageable pageable) {
-        Page<PerformedServiceResponseDTO> response = performedServiceService.getAllPerformedServices(pageable);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Page<PerformedServiceResponseDTO>> getAllPerformedServices(
+            @RequestParam(required = false) UUID employeeId,
+            @RequestParam(required = false) ServiceStatus status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            Pageable pageable) {
+
+        Page<PerformedServiceResponseDTO> responsePage = performedServiceService.getAllPerformedServices(
+                employeeId, status, startDate, endDate, pageable);
+
+        return ResponseEntity.ok(responsePage);
     }
 
     @GetMapping("/{id}")

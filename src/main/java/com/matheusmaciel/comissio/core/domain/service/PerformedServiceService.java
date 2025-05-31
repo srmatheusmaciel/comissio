@@ -11,10 +11,12 @@ import com.matheusmaciel.comissio.infra.exception.performedService.UpdatePerform
 import com.matheusmaciel.comissio.infra.exception.serviceType.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -181,6 +183,25 @@ public class PerformedServiceService {
         Page<PerformedService> performedServicePage = performedServiceRepository.findAll(pageable);
 
         return performedServicePage.map(PerformedServiceResponseDTO::fromEntity);
+    }
+
+    public Page<PerformedServiceResponseDTO> getAllPerformedServices(
+            UUID employeeId,
+            ServiceStatus status,
+            LocalDate startDate,
+            LocalDate endDate,
+            Pageable pageable) {
+
+
+        Specification<PerformedService> spec = Specification
+                .where(PerformedServiceSpecification.employeeIdEquals(employeeId))
+                .and(PerformedServiceSpecification.statusEquals(status))
+                .and(PerformedServiceSpecification.serviceDateGreaterThanOrEquals(startDate))
+                .and(PerformedServiceSpecification.serviceDateLessThanOrEquals(endDate));
+
+
+        Page<PerformedService> performedServicesPage = performedServiceRepository.findAll(spec, pageable);
+        return performedServicesPage.map(PerformedServiceResponseDTO::fromEntity);
     }
 
     public PerformedServiceResponseDTO getPerformedServiceById(UUID id) {
