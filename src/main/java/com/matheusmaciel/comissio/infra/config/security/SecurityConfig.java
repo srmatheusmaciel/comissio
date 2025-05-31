@@ -77,6 +77,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/performed-services/{id}/cancel").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.DELETE, "/performed-services/{id}").hasRole("ADMIN")
 
+                        .requestMatchers(HttpMethod.POST, "/comission-payments/batch").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/comission-payments").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/comission-payments/{id}").hasAnyRole("ADMIN", "MANAGER")
+
 
                         .requestMatchers(SWAGGER_LIST).permitAll();
 

@@ -109,4 +109,17 @@ public class PerformedServiceController {
     }
 
 
+    //payment
+    @PatchMapping("/{id}/pay")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @Operation(summary = "Mark the commission for a completed service as paid",
+              description = "Updates the service status to COMMISSION_PAID and records the commission payment.")
+    @ApiResponse(responseCode = "200", description = "Commission marked as paid and payment registered successfully.")
+    @ApiResponse(responseCode = "400", description = "Unable to mark as paid (e.g. invalid status).")
+    @ApiResponse(responseCode = "404", description = "Service performed not found.")
+    public ResponseEntity<PerformedServiceResponseDTO> markServiceAsPaid(@PathVariable UUID id) {
+        PerformedServiceResponseDTO response = performedServiceService.markCommissionAsPaid(id);
+        return ResponseEntity.ok(response);
+    }
+
 }

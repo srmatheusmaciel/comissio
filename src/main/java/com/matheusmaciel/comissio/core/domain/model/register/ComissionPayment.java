@@ -1,5 +1,6 @@
 package com.matheusmaciel.comissio.core.domain.model.register;
 
+import com.matheusmaciel.comissio.infra.config.ServiceStatusConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,7 +36,8 @@ public class ComissionPayment {
     @Column(name = "amount_paid", nullable = false)
     private BigDecimal amountPaid;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ServiceStatusConverter.class)
+    @Column(name = "status", nullable = false)
     private PaymentStatus status;
 
     @Column(name = "payment_date")
