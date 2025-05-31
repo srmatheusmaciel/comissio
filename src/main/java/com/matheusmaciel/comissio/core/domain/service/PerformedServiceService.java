@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,17 +27,20 @@ public class PerformedServiceService {
     private final ServiceTypeRepository serviceTypeRepository;
     private final EmployeeComissionRepository employeeComissionRepository;
     private final ComissionConfigRepository comissionConfigRepository;
+    private final ComissionPaymentRepository comissionPaymentRepository;
 
     public PerformedServiceService(PerformedServiceRepository performedServiceRepository,
                                    EmployeeRepository employeeRepository,
                                    ServiceTypeRepository serviceTypeRepository,
                                    EmployeeComissionRepository employeeComissionRepository,
-                                   ComissionConfigRepository comissionConfigRepository) {
+                                   ComissionConfigRepository comissionConfigRepository,
+                                   ComissionPaymentRepository comissionPaymentRepository) {
         this.performedServiceRepository = performedServiceRepository;
         this.employeeRepository = employeeRepository;
         this.serviceTypeRepository = serviceTypeRepository;
         this.employeeComissionRepository = employeeComissionRepository;
         this.comissionConfigRepository = comissionConfigRepository;
+        this.comissionPaymentRepository = comissionPaymentRepository;
     }
 
     @Transactional
@@ -183,6 +187,33 @@ public class PerformedServiceService {
         PerformedService performedService = performedServiceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PerformedService not found with ID: " + id));
         return PerformedServiceResponseDTO.fromEntity(performedService);
+    }
+
+    //payment
+    @Transactional
+    public PerformedServiceResponseDTO markCommissionAsPaid(UUID performedServiceId) {
+        PerformedService performedService = performedServiceRepository.findById(performedServiceId)
+                .orElseThrow(() -> new ResourceNotFoundException("PerformedService not found with ID: " + performedServiceId));
+
+        if(performedService.getStatus() != ServiceStatus.COMMISSION_PENDING) {
+            throw new IllegalArgumentException("Cannot mark a PerformedService with status: " + performedService.getStatus() + " as paid");
+        }
+
+        performedService.setStatus(ServiceStatus.COMMISSION_PAID);
+        PerformedService updatedPerformedService = performedServiceRepository.save(performedService);
+
+
+        //Create the CommissionPayment record
+        ComissionPayment payment = ComissionPayment.builder()
+                .employee(updatedPerformedService.getEmployee())
+                .performedService(updatedPerformedService)
+                .amountPaid(updatedPerformedService.getComissionAmount())
+                .status(PaymentStatus.PAID)
+                .paymentDate(LocalDateTime.now())
+                .build();
+        comissionPaymentRepository.save(payment);
+
+        return PerformedServiceResponseDTO.fromEntity(updatedPerformedService);
     }
 
 }
