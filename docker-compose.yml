@@ -12,10 +12,47 @@ services:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - comissio_network
     restart: always
 
+  comissio-app:
+    container_name: comissio_app_container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/comissio_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      API_SECURITY_TOKEN_SECRET: ${ENV_FILE_JWT_SECRET}
+      APP_SPRING_MAIL_USERNAME: ${ENV_FILE_EMAIL_USERNAME}
+      APP_SPRING_MAIL_PASSWORD: ${ENV_FILE_EMAIL_PASSWORD}
+
+    networks:
+      - comissio_network
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: comissio_prometheus
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - comissio_network
+    depends_on:
+      - comissio-app
+    restart: unless-stopped
+
 volumes:
-  pgdata:
+  pgdata: {}
+  prometheus_data: {}
 
 networks:
-  product_network:
+  comissio_network:
+    driver: bridge

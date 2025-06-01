@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+## script sonarAdd commentMore actions
+script_sonar_powershell.txt
+
+.env

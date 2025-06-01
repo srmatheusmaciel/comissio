@@ -81,6 +81,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/comission-payments").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.GET, "/comission-payments/{id}").hasAnyRole("ADMIN", "MANAGER")
 
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/actuator/metrics", "/actuator/loggers").hasRole("ADMIN")
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+
 
                         .requestMatchers(SWAGGER_LIST).permitAll();
 
