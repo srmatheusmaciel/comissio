@@ -49,9 +49,24 @@ services:
       - comissio-app
     restart: unless-stopped
 
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: comissio_grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - comissio_network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
 volumes:
   pgdata: {}
   prometheus_data: {}
+  grafana_data: {}
 
 networks:
   comissio_network:
