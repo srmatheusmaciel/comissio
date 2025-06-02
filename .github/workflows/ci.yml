@@ -24,6 +24,10 @@ jobs:
           cache: 'maven'
 
       - name: Build, Test and Package with Maven
+        env:
+          APP_SPRING_MAIL_USERNAME: ${{ secrets.ENV_FILE_EMAIL_USERNAME }}
+          APP_SPRING_MAIL_PASSWORD: ${{ secrets.ENV_FILE_EMAIL_PASSWORD }}
+          APP_API_SECURITY_TOKEN_SECRET: ${{ secrets.ENV_FILE_JWT_SECRET }}
         run: ./mvnw -B package --file pom.xml
 
       - name: Log in to Docker Hub
