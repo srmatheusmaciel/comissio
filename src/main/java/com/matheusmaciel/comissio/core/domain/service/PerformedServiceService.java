@@ -218,7 +218,7 @@ public class PerformedServiceService {
                 .orElseThrow(() -> new ResourceNotFoundException("PerformedService not found with ID: " + performedServiceId));
 
         if(performedService.getStatus() != ServiceStatus.COMMISSION_PENDING) {
-            throw new IllegalArgumentException("Cannot mark a PerformedService with status: " + performedService.getStatus() + " as paid");
+            throw new BusinessRuleException("Cannot mark commission as paid. Service status is not COMMISSION_PENDING. Current status: " + performedService.getStatus());
         }
 
         performedService.setStatus(ServiceStatus.COMMISSION_PAID);
