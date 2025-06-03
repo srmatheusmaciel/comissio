@@ -8,6 +8,7 @@ import com.matheusmaciel.comissio.core.domain.model.register.ServiceStatus;
 import com.matheusmaciel.comissio.core.domain.model.register.ServiceType;
 import com.matheusmaciel.comissio.core.domain.repository.PerformedServiceRepository;
 import com.matheusmaciel.comissio.core.domain.service.PerformedServiceService;
+import com.matheusmaciel.comissio.infra.exception.performedService.BusinessRuleException;
 import com.matheusmaciel.comissio.infra.exception.serviceType.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,8 +26,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class PerformedServiceServiceTest {
@@ -101,5 +101,44 @@ public class PerformedServiceServiceTest {
                 .hasMessageContaining("PerformedService not found with ID: " + nonExistingId);
     }
 
+    @Test
+    @DisplayName("cancelPerformedService should throw BusinessRuleException when status is paid")
+    void cancelPerformedService_whenStatusIsPaid_shouldThrowBusinessRuleException() {
+        PerformedService paidService = PerformedService.builder()
+                .id(existingPerformedServiceId)
+                .status(ServiceStatus.COMMISSION_PAID)
+                .employee(sampleEmployee)
+                .serviceTypeId(sampleServiceType)
+                .build();
 
+        when(performedServiceRepository.findById(existingPerformedServiceId)).thenReturn(Optional.of(paidService));
+
+        assertThatThrownBy(() -> performedServiceService.cancelPerformedService(existingPerformedServiceId))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("Performed Service cannot be cancelled. Status is not COMMISSION_PENDING. Current status: COMMISSION_PAID");
+
+        verify(performedServiceRepository, never()).save(any(PerformedService.class));
+    }
+
+    @Test
+    @DisplayName("cancelPerformedService should throw BusinessRuleException when status is already cancelled")
+    void cancelPerformedService_whenStatusIsAlreadyCancelled_shouldThrowBusinessRuleException() {
+        PerformedService alreadyCancelledService = PerformedService.builder()
+                .id(existingPerformedServiceId)
+                .status(ServiceStatus.CANCELLED)
+                .employee(sampleEmployee)
+                .serviceTypeId(sampleServiceType)
+                .build();
+
+        when(performedServiceRepository.findById(existingPerformedServiceId)).thenReturn(Optional.of(alreadyCancelledService));
+
+        assertThatThrownBy(() -> performedServiceService.cancelPerformedService(existingPerformedServiceId))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("Performed Service cannot be cancelled. Status is not COMMISSION_PENDING. Current status: " + ServiceStatus.CANCELLED);
+
+        verify(performedServiceRepository, never()).save(any(PerformedService.class));
+    }
 }
+
+
+

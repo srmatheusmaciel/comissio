@@ -6,6 +6,7 @@ import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServ
 import com.matheusmaciel.comissio.core.domain.model.register.*;
 import com.matheusmaciel.comissio.core.domain.repository.*;
 import com.matheusmaciel.comissio.infra.exception.BusinessException;
+import com.matheusmaciel.comissio.infra.exception.performedService.BusinessRuleException;
 import com.matheusmaciel.comissio.infra.exception.performedService.CommissionRuleNotFoundException;
 import com.matheusmaciel.comissio.infra.exception.performedService.UpdatePerformedServiceException;
 import com.matheusmaciel.comissio.infra.exception.serviceType.ResourceNotFoundException;
@@ -97,7 +98,7 @@ public class PerformedServiceService {
                 .orElseThrow(() -> new ResourceNotFoundException("PerformedService not found with ID: " + performedServiceId));
 
         if(service.getStatus() != ServiceStatus.COMMISSION_PENDING) {
-            throw new IllegalArgumentException("Cannot cancel a PerformedService with status: " + service.getStatus());
+            throw new BusinessRuleException("Performed Service cannot be cancelled. Status is not COMMISSION_PENDING. Current status: " + service.getStatus());
         }
 
         service.setStatus(ServiceStatus.CANCELLED);

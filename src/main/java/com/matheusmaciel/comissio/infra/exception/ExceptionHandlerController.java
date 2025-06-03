@@ -6,7 +6,10 @@ import java.util.*;
 
 import com.matheusmaciel.comissio.infra.exception.dto.ErrorMessageDTO;
 import com.matheusmaciel.comissio.infra.exception.employee.EmployeeNotFoundException;
+import com.matheusmaciel.comissio.infra.exception.performedService.UpdatePerformedServiceException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -16,10 +19,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+
+
 @RestControllerAdvice
 public class ExceptionHandlerController {
 
-    private MessageSource messageSource;
+    private static final Logger logger = LoggerFactory.getLogger(ExceptionHandlerController.class);
+
+    private final MessageSource messageSource;
 
     public ExceptionHandlerController(MessageSource messageSource) {
         this.messageSource = messageSource;
@@ -50,19 +57,37 @@ public class ExceptionHandlerController {
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(UpdatePerformedServiceException.class)
+    public ResponseEntity<Object> handleUpdatePerformedServiceException(UpdatePerformedServiceException ex, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("error", HttpStatus.CONFLICT.getReasonPhrase());
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Map<String, String>> handleBusinessException(BusinessException ex) {
         Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
+        error.put("message", ex.getMessage());
         return ResponseEntity.badRequest().body(error);
     }
 
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", "Internal Server Error");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex, WebRequest request) {
+        logger.error("Unhandled exception occurred", ex);
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        body.put("error", HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        body.put("message", "An unexpected internal server error occurred.");
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
