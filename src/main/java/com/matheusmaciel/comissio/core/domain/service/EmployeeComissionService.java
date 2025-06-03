@@ -13,6 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -133,5 +134,10 @@ public class EmployeeComissionService {
             throw new ResourceNotFoundException("EmployeeComission not found with ID: " + id);
         }
         employeeComissionRepository.deleteById(id);
+    }
+
+    public Optional<BigDecimal> findCustomPercentage(UUID employeeId, UUID serviceTypeId) {
+        return employeeComissionRepository.findByEmployeeIdAndServiceTypeId(employeeId, serviceTypeId)
+                .map(EmployeeComission::getCustomPercentage);
     }
 }
