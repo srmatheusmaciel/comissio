@@ -135,9 +135,4 @@ public class EmployeeComissionService {
         }
         employeeComissionRepository.deleteById(id);
     }
-
-    public Optional<BigDecimal> findCustomPercentage(UUID employeeId, UUID serviceTypeId) {
-        return employeeComissionRepository.findByEmployeeIdAndServiceTypeId(employeeId, serviceTypeId)
-                .map(EmployeeComission::getCustomPercentage);
-    }
 }
