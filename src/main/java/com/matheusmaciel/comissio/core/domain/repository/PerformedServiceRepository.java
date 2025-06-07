@@ -18,4 +18,6 @@ public interface PerformedServiceRepository extends JpaRepository<PerformedServi
 
     List<PerformedService> findByEmployee_IdAndStatus(UUID employeeId, ServiceStatus status);
 
+    List<PerformedService> findByEmployeeIdAndServiceDateBetween(UUID employeeId, LocalDate startDate, LocalDate endDate);
+
 }

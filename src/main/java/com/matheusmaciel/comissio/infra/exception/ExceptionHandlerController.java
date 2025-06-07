@@ -6,6 +6,7 @@ import java.util.*;
 
 import com.matheusmaciel.comissio.infra.exception.dto.ErrorMessageDTO;
 import com.matheusmaciel.comissio.infra.exception.employee.EmployeeNotFoundException;
+import com.matheusmaciel.comissio.infra.exception.performedService.BusinessRuleException;
 import com.matheusmaciel.comissio.infra.exception.performedService.UpdatePerformedServiceException;
 
 import org.slf4j.Logger;
@@ -73,6 +74,17 @@ public class ExceptionHandlerController {
         Map<String, String> error = new HashMap<>();
         error.put("message", ex.getMessage());
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<Object> handleBusinessRuleException(BusinessRuleException ex, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", HttpStatus.NOT_FOUND.getReasonPhrase());
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
 

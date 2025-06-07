@@ -13,6 +13,6 @@ public class FlywayMigrationRunner {
         //flyway.migrate();
 
         
-         //flyway.repair();
+         flyway.repair();
     }
 }

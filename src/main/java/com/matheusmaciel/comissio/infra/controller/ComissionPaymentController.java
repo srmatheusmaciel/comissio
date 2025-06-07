@@ -35,7 +35,7 @@ public class ComissionPaymentController {
     }
 
     @PostMapping("/batch")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')") // Conforme RN005
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Processar pagamento de comissões em lote para um funcionário",
             description = "Paga todas as comissões pendentes de um funcionário (opcionalmente até uma data de serviço específica), " +
                     "atualizando o status dos serviços e criando registros de pagamento individuais para cada comissão.")
@@ -52,7 +52,7 @@ public class ComissionPaymentController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Listar todos os registros de pagamento de comissão com paginação",
             description = "Retorna uma lista paginada de todos os pagamentos de comissão registrados.")
-    @PageableAsQueryParam // Documenta os parâmetros de paginação para o Swagger
+    @PageableAsQueryParam
     @ApiResponse(responseCode = "200", description = "Lista paginada de pagamentos obtida com sucesso.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class)))
     public ResponseEntity<Page<ComissionPaymentResponseDTO>> getAllComissionPayments(Pageable pageable) {

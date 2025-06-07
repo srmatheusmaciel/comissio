@@ -42,8 +42,8 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> { auth
                         .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
-                        // .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/register").hasRole("ADMIN") // If the register is only for admin
+                        .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+                        //.requestMatchers(HttpMethod.POST, "/users/register").hasRole("ADMIN") // If the register is only for admin
                         .requestMatchers(HttpMethod.GET, "/users/list").hasRole("ADMIN")
 
 

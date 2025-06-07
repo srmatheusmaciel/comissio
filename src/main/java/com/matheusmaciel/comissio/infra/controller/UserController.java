@@ -63,7 +63,7 @@ public class UserController {
   }
 
 
-  @PreAuthorize("hasRole('ADMIN')")
+  //@PreAuthorize("hasRole('ADMIN')")
   @Tag(name = "Users", description = "Users register")
   @Operation(summary = "Register a new user", description = "This endpoint registers a new user in the system")
   @ApiResponses({
