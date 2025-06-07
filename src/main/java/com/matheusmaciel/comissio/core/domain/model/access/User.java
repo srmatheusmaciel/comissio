@@ -45,6 +45,7 @@ public class User implements UserDetails {
     @Length(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
     private String password;
 
+    @Enumerated(EnumType.STRING)
     private UserRole role;
 
 

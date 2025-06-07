@@ -11,6 +11,8 @@ import java.util.UUID;
 public record EmployeeResponseDTO(
         UUID id,
         UUID userId,
+        String name,
+        String email,
         StatusEmployee status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
@@ -20,18 +22,26 @@ public record EmployeeResponseDTO(
 
                 User user = employee.getUser();
 
-                String name = null;
-                String email = null;
-                if(user != null) {
-                        name = user.getName();
-                        email = user.getEmail();
+                if(user == null) {
+                        return new EmployeeResponseDTO(
+                                employee.getId(),
+                                null,
+                                null,
+                                null,
+                                employee.getStatus(),
+                                employee.getCreated_at(),
+                                employee.getUpdated_at()
+                        );
                 }
 
-                return new EmployeeResponseDTO(employee.getId(),
-                user.getId() != null ? employee.getUser().getId() : null,
-                employee.getStatus(),
-                employee.getCreated_at(),
-                employee.getUpdated_at()
+                return new EmployeeResponseDTO(
+                        employee.getId(),
+                        user.getId(),
+                        user.getName(),
+                        user.getEmail(),
+                        employee.getStatus(),
+                        employee.getCreated_at(),
+                        employee.getUpdated_at()
                 );
 
         }

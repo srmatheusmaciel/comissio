@@ -36,7 +36,7 @@ public class ComissionPayment {
     @Column(name = "amount_paid", nullable = false)
     private BigDecimal amountPaid;
 
-    @Convert(converter = ServiceStatusConverter.class)
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private PaymentStatus status;
 
