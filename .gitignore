@@ -36,3 +36,4 @@ build/
 script_sonar_powershell.txt
 
 .env
+*.pdf
