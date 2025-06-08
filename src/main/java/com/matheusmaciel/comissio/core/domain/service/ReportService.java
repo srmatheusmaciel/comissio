@@ -9,7 +9,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
@@ -167,13 +167,13 @@ public class ReportService {
 
         switch (service.getStatus()) {
             case COMMISSION_PAID:
-                statusText = "Paid";
+                statusText = "Pago";
                 break;
             case COMMISSION_PENDING:
-                statusText = "Pending";
+                statusText = "Pendente";
                 break;
             case CANCELLED:
-                statusText = "Cancelled";
+                statusText = "Cancelado";
                 break;
             default:
                 statusText = "N/A";
@@ -221,8 +221,6 @@ public class ReportService {
         contentStream.endText();
     }
 
-    // Dentro da classe ReportService.java
-
     private void drawFooter(PDPageContentStream contentStream, PDType1Font font) throws IOException {
         contentStream.beginText();
         contentStream.setFont(font, 8);
@@ -234,23 +232,61 @@ public class ReportService {
 
 
 
-public byte[] generateIndividualCommissionReportExcel(UUID employeeId, LocalDate startDate, LocalDate endDate) throws IOException {
+    public byte[] generateIndividualCommissionReportExcel(UUID employeeId, LocalDate startDate, LocalDate endDate) throws IOException {
+
+        List<PerformedService> services = performedServiceRepository.findByEmployeeIdAndServiceDateBetween(employeeId, startDate, endDate);
+        EmployeeResponseDTO employee = employeeService.getEmployeeById(employeeId);
+
 
         try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            XSSFSheet sheet = workbook.createSheet("Comissões " + employeeId);
+                XSSFSheet sheet = workbook.createSheet("Comissões " + employee.name());
 
-            Row headerRow = sheet.createRow(0);
-            headerRow.createCell(0).setCellValue("Data Serviço");
-            headerRow.createCell(1).setCellValue("Tipo Serviço");
-            headerRow.createCell(2).setCellValue("Valor Serviço");
-            headerRow.createCell(3).setCellValue("Comissão (%)");
-            headerRow.createCell(4).setCellValue("Valor Comissão");
-            headerRow.createCell(5).setCellValue("Status");
+                Font headerFont = workbook.createFont();
+                headerFont.setBold(true);
+                headerFont.setFontHeightInPoints((short) 12);
+                headerFont.setColor(IndexedColors.BLACK.getIndex());
+
+                CellStyle headerCellStyle = workbook.createCellStyle();
+                headerCellStyle.setFont(headerFont);
 
 
-            workbook.write(outputStream);
-            return outputStream.toByteArray();
-        }
+                CellStyle currencyCellStyle = workbook.createCellStyle();
+                CreationHelper createHelper = workbook.getCreationHelper();
+                currencyCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("#,##0.00"));
+
+                Row headerRow = sheet.createRow(0);
+                String[] columns = {"Data Serviço", "Serviço", "Valor Serviço (R$)", "Comissão (R$)", "Status"};
+                for (int i = 0; i < columns.length; i++) {
+                    Cell cell = headerRow.createCell(i);
+                    cell.setCellValue(columns[i]);
+                    cell.setCellStyle(headerCellStyle);
+                }
+
+                int rowNum = 1;
+                for (PerformedService service : services) {
+                    Row row = sheet.createRow(rowNum++);
+
+                    row.createCell(0).setCellValue(service.getServiceDate());
+                    row.createCell(1).setCellValue(service.getServiceTypeId().getName());
+
+                    Cell priceCell = row.createCell(2);
+                    priceCell.setCellValue(service.getPrice().doubleValue());
+                    priceCell.setCellStyle(currencyCellStyle);
+
+                    Cell comissionCell = row.createCell(3);
+                    comissionCell.setCellValue(service.getComissionAmount().doubleValue());
+                    comissionCell.setCellStyle(currencyCellStyle);
+
+                    row.createCell(4).setCellValue(service.getStatus().name());
+                }
+
+                for (int i = 0; i < columns.length; i++) {
+                    sheet.autoSizeColumn(i);
+                }
+
+                workbook.write(outputStream);
+                return outputStream.toByteArray();
+            }
+
+            }
     }
-
-}
