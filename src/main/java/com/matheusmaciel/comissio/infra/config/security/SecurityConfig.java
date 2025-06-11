@@ -71,8 +71,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/employee-comissions/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.POST, "/performed-services").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.GET, "/performed-services").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.GET, "/performed-services/{id}").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/performed-services").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.GET, "/performed-services/{id}").hasAnyRole("ADMIN", "MANAGER","EMPLOYEE")
                         .requestMatchers(HttpMethod.PUT, "/performed-services/{id}").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.PATCH, "/performed-services/{id}/cancel").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.DELETE, "/performed-services/{id}").hasRole("ADMIN")
@@ -81,7 +81,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/comission-payments").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.GET, "/comission-payments/{id}").hasAnyRole("ADMIN", "MANAGER")
 
-                        .requestMatchers(HttpMethod.GET, "/reports/employees/{id}/commissions").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/reports/employees/{id}/commissions").hasAnyRole("ADMIN", "MANAGER", "EMPLOYEE")
                         .requestMatchers(HttpMethod.POST, "/reports/employees/{id}/commissions/send-email").hasAnyRole("ADMIN", "MANAGER")
 
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()

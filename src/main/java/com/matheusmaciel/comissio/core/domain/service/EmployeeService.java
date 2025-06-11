@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -69,5 +70,9 @@ public class EmployeeService {
         Employee employee = this.employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EmployeeNotFoundException("Employee not found"));
         return EmployeeResponseDTO.fromEntity(employee);
+    }
+
+    public Optional<Employee> findByUserId(UUID id) {
+        return this.employeeRepository.findByUser_Id(id);
     }
 }

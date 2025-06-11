@@ -6,7 +6,6 @@ import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServ
 import com.matheusmaciel.comissio.core.domain.model.register.ServiceStatus;
 import com.matheusmaciel.comissio.core.domain.service.PerformedServiceService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.security.core.Authentication;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -90,7 +90,7 @@ public class PerformedServiceController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @Operation(summary = "List all performed services with pagination",
             description = "Returns a paginated list of all registered services." +
                     "You can control pagination and sorting using the parameters:" +
@@ -102,10 +102,10 @@ public class PerformedServiceController {
             @RequestParam(required = false) ServiceStatus status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            Pageable pageable) {
+            Pageable pageable, Authentication authentication) {
 
         Page<PerformedServiceResponseDTO> responsePage = performedServiceService.getAllPerformedServices(
-                employeeId, status, startDate, endDate, pageable);
+                employeeId, status, startDate, endDate, pageable, authentication);
 
         return ResponseEntity.ok(responsePage);
     }

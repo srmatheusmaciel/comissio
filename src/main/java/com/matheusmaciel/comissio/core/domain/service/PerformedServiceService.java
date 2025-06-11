@@ -5,7 +5,6 @@ import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServ
 import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServiceUpdateRequestDTO;
 import com.matheusmaciel.comissio.core.domain.model.register.*;
 import com.matheusmaciel.comissio.core.domain.repository.*;
-import com.matheusmaciel.comissio.infra.exception.BusinessException;
 import com.matheusmaciel.comissio.infra.exception.performedService.BusinessRuleException;
 import com.matheusmaciel.comissio.infra.exception.performedService.CommissionRuleNotFoundException;
 import com.matheusmaciel.comissio.infra.exception.performedService.UpdatePerformedServiceException;
@@ -15,6 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.matheusmaciel.comissio.core.domain.model.access.User;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -191,11 +193,26 @@ public class PerformedServiceService {
             ServiceStatus status,
             LocalDate startDate,
             LocalDate endDate,
-            Pageable pageable) {
+            Pageable pageable,
+            Authentication authentication) {
+
+        User authenticatedUser = (User) authentication.getPrincipal();
+        boolean isUserRole = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_EMPLOYEE"));
+
+        UUID finalEmployeeId = employeeId;
+
+        if (isUserRole && !authentication.getAuthorities().stream().anyMatch(
+                r -> r.getAuthority().equals("ROLE_ADMIN") || r.getAuthority().equals("ROLE_MANAGER"))) {
+            Employee employee = employeeRepository.findByUser_Id(authenticatedUser.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Nenhum perfil de funcionário encontrado para o usuário: " + authenticatedUser.getUsername()));
+            finalEmployeeId = employee.getId();
+        }
 
 
         Specification<PerformedService> spec = Specification
-                .where(PerformedServiceSpecification.employeeIdEquals(employeeId))
+                .where(PerformedServiceSpecification.employeeIdEquals(finalEmployeeId))
                 .and(PerformedServiceSpecification.statusEquals(status))
                 .and(PerformedServiceSpecification.serviceDateGreaterThanOrEquals(startDate))
                 .and(PerformedServiceSpecification.serviceDateLessThanOrEquals(endDate));

@@ -5,7 +5,8 @@ import com.matheusmaciel.comissio.core.domain.dto.report.ReportFile;
 import com.matheusmaciel.comissio.core.domain.model.register.Employee;
 import com.matheusmaciel.comissio.core.domain.model.register.PerformedService;
 import com.matheusmaciel.comissio.core.domain.repository.PerformedServiceRepository;
-import com.matheusmaciel.comissio.infra.exception.employee.EmployeeNotFoundException;
+import com.matheusmaciel.comissio.core.domain.model.access.User;
+import com.matheusmaciel.comissio.infra.exception.serviceType.ResourceNotFoundException;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
@@ -13,6 +14,7 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -327,4 +329,18 @@ public class ReportService {
                 return new ReportFile(reportBytes, fileName, contentType);
 
             }
+
+    public ReportFile generateMyCommissionReport(Authentication authentication, LocalDate startDate, LocalDate endDate, String format) throws IOException {
+
+        User authenticatedUser = (User) authentication.getPrincipal();
+
+        Employee employee = employeeService.findByUserId(authenticatedUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Nenhum perfil de funcionário encontrado para o usuário logado."));
+
+        if ("excel".equalsIgnoreCase(format)) {
+            return generateIndividualCommissionReportExcel(employee.getId(), startDate, endDate);
+        } else {
+            return generateIndividualCommisionReportPdf(employee.getId(), startDate, endDate);
+        }
+    }
     }

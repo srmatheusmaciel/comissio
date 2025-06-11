@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class ReportController {
     }
 
     @GetMapping("/employees/{employeeId}/commissions")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')") // Ou lógica para funcionário ver o seu próprio
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Gerar relatório de comissão individual para um funcionário")
     @ApiResponse(responseCode = "200", description = "Relatório gerado com sucesso")
     @ApiResponse(responseCode = "404", description = "Funcionário não encontrado")
@@ -56,6 +57,25 @@ public class ReportController {
         } else {
             reportFile = reportService.generateIndividualCommisionReportPdf(employeeId, startDate, endDate);
         }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(reportFile.contentType()));
+        headers.setContentDispositionFormData("attachment", reportFile.filename());
+
+        return new ResponseEntity<>(reportFile.content(), headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/my-commissions")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
+    @Operation(summary = "Gerar relatório de comissão para o funcionário autenticado")
+    @ApiResponse(responseCode = "200", description = "Relatório pessoal gerado com sucesso")
+    public ResponseEntity<byte[]> getMyCommissionReport(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "pdf") String format, Authentication authentication) throws IOException {
+
+        ReportFile reportFile = reportService.generateMyCommissionReport(authentication, startDate, endDate, format);
+
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(reportFile.contentType()));
