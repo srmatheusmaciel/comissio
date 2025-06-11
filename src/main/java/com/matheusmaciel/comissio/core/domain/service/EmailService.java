@@ -1,5 +1,6 @@
 package com.matheusmaciel.comissio.core.domain.service;
 
+import com.matheusmaciel.comissio.core.domain.dto.report.ReportFile;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,23 +52,19 @@ public class EmailService {
 
     public void sendCommissionReportByEmail(String toEmail, UUID employeeId,
                                             LocalDate startDate, LocalDate endDate, String format) throws IOException {
-        byte[] reportBytes;
-        String filename;
-        String contentType;
+        ReportFile reportFile;
         String subject = "Seu Relatório de Comissões - Período: " + startDate + " a " + endDate;
         String body = "Olá, segue em anexo o seu relatório de comissões.";
 
 
         if ("excel".equalsIgnoreCase(format)) {
-            reportBytes = reportService.generateIndividualCommissionReportExcel(employeeId, startDate, endDate);
-            filename = "comissoes_" + employeeId + "_" + startDate + "_a_" + endDate + ".xlsx";
-            contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            reportFile = reportService.generateIndividualCommissionReportExcel(employeeId, startDate, endDate);
+
         } else {
-            reportBytes = reportService.generateIndividualCommisionReportPdf(employeeId, startDate, endDate);
-            filename = "comissoes_" + employeeId + "_" + startDate + "_a_" + endDate + ".pdf";
-            contentType = MediaType.APPLICATION_PDF_VALUE;
+            reportFile = reportService.generateIndividualCommisionReportPdf(employeeId, startDate, endDate);
+
         }
 
-        sendEmailWithAttachment(toEmail, subject, body, reportBytes, filename, contentType);
+        sendEmailWithAttachment(toEmail, subject, body, reportFile.content(), reportFile.filename(), reportFile.contentType());
     }
 }

@@ -1,6 +1,7 @@
 package com.matheusmaciel.comissio.infra.controller;
 
 
+import com.matheusmaciel.comissio.core.domain.dto.report.ReportFile;
 import com.matheusmaciel.comissio.core.domain.service.EmailService;
 import com.matheusmaciel.comissio.core.domain.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,25 +49,19 @@ public class ReportController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(defaultValue = "pdf") String format) throws IOException {
 
-        byte[] reportBytes;
-        String contentType;
-        String filename;
+        ReportFile reportFile;
 
         if ("excel".equalsIgnoreCase(format)) {
-            reportBytes = reportService.generateIndividualCommissionReportExcel(employeeId, startDate, endDate);
-            contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            filename = "comissoes_" + employeeId + "_" + startDate + "_a_" + endDate + ".xlsx";
-        } else { // PDF como padrão
-            reportBytes = reportService.generateIndividualCommisionReportPdf(employeeId, startDate, endDate);
-            contentType = MediaType.APPLICATION_PDF_VALUE;
-            filename = "comissoes_" + employeeId + "_" + startDate + "_a_" + endDate + ".pdf";
+            reportFile = reportService.generateIndividualCommissionReportExcel(employeeId, startDate, endDate);
+        } else {
+            reportFile = reportService.generateIndividualCommisionReportPdf(employeeId, startDate, endDate);
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(contentType));
-        headers.setContentDispositionFormData("attachment", filename);
+        headers.setContentType(MediaType.parseMediaType(reportFile.contentType()));
+        headers.setContentDispositionFormData("attachment", reportFile.filename());
 
-        return new ResponseEntity<>(reportBytes, headers, HttpStatus.OK);
+        return new ResponseEntity<>(reportFile.content(), headers, HttpStatus.OK);
     }
 
     @PostMapping("/employees/{employeeId}/commissions/send-email")

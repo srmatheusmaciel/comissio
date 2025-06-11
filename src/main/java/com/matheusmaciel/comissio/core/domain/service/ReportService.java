@@ -1,6 +1,7 @@
 package com.matheusmaciel.comissio.core.domain.service;
 
 import com.matheusmaciel.comissio.core.domain.dto.employee.EmployeeResponseDTO;
+import com.matheusmaciel.comissio.core.domain.dto.report.ReportFile;
 import com.matheusmaciel.comissio.core.domain.model.register.Employee;
 import com.matheusmaciel.comissio.core.domain.model.register.PerformedService;
 import com.matheusmaciel.comissio.core.domain.repository.PerformedServiceRepository;
@@ -41,7 +42,7 @@ public class ReportService {
         this.employeeService = employeeService;
     }
 
-    public byte[] generateIndividualCommisionReportPdf(UUID employeeId,
+    public ReportFile generateIndividualCommisionReportPdf(UUID employeeId,
                                                        LocalDate startDate,
                                                        LocalDate endDate) throws IOException {
 
@@ -50,6 +51,8 @@ public class ReportService {
 
         BigDecimal totalServicesPrice = BigDecimal.ZERO;
         BigDecimal totalCommissionAmount = BigDecimal.ZERO;
+
+        byte[] reportBytes;
 
 
         try (PDDocument document = new PDDocument()) {
@@ -117,8 +120,14 @@ public class ReportService {
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             document.save(outputStream);
-            return outputStream.toByteArray();
+            reportBytes = outputStream.toByteArray();
         }
+
+        String sanitizedEmployeeName = employee.name().replaceAll("[^a-zA-Z0-9.-]", "_");
+        String fileName = "comissao_" + sanitizedEmployeeName + ".pdf";
+        String contentType = "application/pdf";
+
+        return new ReportFile(reportBytes, fileName, contentType);
     }
 
     private void drawPageHeader(PDPageContentStream contentStream, String employeeName, LocalDate startDate, LocalDate endDate,
@@ -225,17 +234,19 @@ public class ReportService {
         contentStream.beginText();
         contentStream.setFont(font, 8);
         contentStream.newLineAtOffset(50, 30);
-        contentStream.showText("Relatório gerado por COMISSIO APP");
+        contentStream.showText("Relatório gerado por Comissio App");
         contentStream.endText();
     }
 
 
 
 
-    public byte[] generateIndividualCommissionReportExcel(UUID employeeId, LocalDate startDate, LocalDate endDate) throws IOException {
+    public ReportFile generateIndividualCommissionReportExcel(UUID employeeId, LocalDate startDate, LocalDate endDate) throws IOException {
 
         List<PerformedService> services = performedServiceRepository.findByEmployeeIdAndServiceDateBetween(employeeId, startDate, endDate);
         EmployeeResponseDTO employee = employeeService.getEmployeeById(employeeId);
+
+        byte[] reportBytes;
 
 
         try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
@@ -245,7 +256,6 @@ public class ReportService {
                 headerFont.setBold(true);
                 headerFont.setFontHeightInPoints((short) 12);
                 headerFont.setColor(IndexedColors.BLACK.getIndex());
-
                 CellStyle headerCellStyle = workbook.createCellStyle();
                 headerCellStyle.setFont(headerFont);
 
@@ -253,6 +263,9 @@ public class ReportService {
                 CellStyle currencyCellStyle = workbook.createCellStyle();
                 CreationHelper createHelper = workbook.getCreationHelper();
                 currencyCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("#,##0.00"));
+
+                CellStyle dateCellStyle = workbook.createCellStyle();
+                dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/MM/yyyy"));
 
                 Row headerRow = sheet.createRow(0);
                 String[] columns = {"Data Serviço", "Serviço", "Valor Serviço (R$)", "Comissão (R$)", "Status"};
@@ -266,7 +279,10 @@ public class ReportService {
                 for (PerformedService service : services) {
                     Row row = sheet.createRow(rowNum++);
 
-                    row.createCell(0).setCellValue(service.getServiceDate());
+                    Cell dateCell = row.createCell(0);
+                    dateCell.setCellValue(service.getServiceDate());
+                    dateCell.setCellStyle(dateCellStyle);
+
                     row.createCell(1).setCellValue(service.getServiceTypeId().getName());
 
                     Cell priceCell = row.createCell(2);
@@ -277,7 +293,23 @@ public class ReportService {
                     comissionCell.setCellValue(service.getComissionAmount().doubleValue());
                     comissionCell.setCellStyle(currencyCellStyle);
 
-                    row.createCell(4).setCellValue(service.getStatus().name());
+                    String statusText;
+                    switch (service.getStatus()) {
+                        case COMMISSION_PAID:
+                            statusText = "Pago";
+                            break;
+                        case COMMISSION_PENDING:
+                            statusText = "Pendente";
+                            break;
+                        case CANCELLED:
+                            statusText = "Cancelado";
+                            break;
+                        default:
+                            statusText = "N/A";
+                            break;
+                    }
+
+                    row.createCell(4).setCellValue(statusText);
                 }
 
                 for (int i = 0; i < columns.length; i++) {
@@ -285,8 +317,14 @@ public class ReportService {
                 }
 
                 workbook.write(outputStream);
-                return outputStream.toByteArray();
-            }
+                reportBytes = outputStream.toByteArray();
+         }
+
+                String sanitizedEmployeeName = employee.name().replaceAll("[^a-zA-Z0-9.\\-]", "_");
+                String fileName = "comissao_" + sanitizedEmployeeName + ".xlsx";
+                String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return new ReportFile(reportBytes, fileName, contentType);
 
             }
     }
