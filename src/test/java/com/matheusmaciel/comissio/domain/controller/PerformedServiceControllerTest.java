@@ -1,12 +1,12 @@
 package com.matheusmaciel.comissio.domain.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.matheusmaciel.comissio.AbstractIntegrationTest; // Importa a classe base
-import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServiceRequestDTO;
-import com.matheusmaciel.comissio.core.domain.model.access.User;
-import com.matheusmaciel.comissio.core.domain.model.access.UserRole;
-import com.matheusmaciel.comissio.core.domain.model.register.*;
-import com.matheusmaciel.comissio.core.domain.repository.*;
+import com.matheusmaciel.comissio.AbstractIntegrationTest;
+import com.matheusmaciel.comissio.core.dto.performedService.PerformedServiceRequestDTO;
+import com.matheusmaciel.comissio.core.model.access.User;
+import com.matheusmaciel.comissio.core.model.access.UserRole;
+import com.matheusmaciel.comissio.core.model.register.*;
+import com.matheusmaciel.comissio.core.repository.*;
 import com.matheusmaciel.comissio.infra.config.security.TokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

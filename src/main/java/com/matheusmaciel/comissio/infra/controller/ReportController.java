@@ -1,13 +1,10 @@
 package com.matheusmaciel.comissio.infra.controller;
 
 
-import com.matheusmaciel.comissio.core.domain.dto.report.ReportFile;
-import com.matheusmaciel.comissio.core.domain.service.EmailService;
-import com.matheusmaciel.comissio.core.domain.service.ReportService;
+import com.matheusmaciel.comissio.core.dto.report.ReportFile;
+import com.matheusmaciel.comissio.core.service.EmailService;
+import com.matheusmaciel.comissio.core.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,12 +1,12 @@
 package com.matheusmaciel.comissio.domain.service;
 
-import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServiceRequestDTO;
-import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServiceResponseDTO;
-import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServiceUpdateRequestDTO;
-import com.matheusmaciel.comissio.core.domain.model.access.User;
-import com.matheusmaciel.comissio.core.domain.model.register.*;
-import com.matheusmaciel.comissio.core.domain.repository.*;
-import com.matheusmaciel.comissio.core.domain.service.PerformedServiceService;
+import com.matheusmaciel.comissio.core.dto.performedService.PerformedServiceRequestDTO;
+import com.matheusmaciel.comissio.core.dto.performedService.PerformedServiceResponseDTO;
+import com.matheusmaciel.comissio.core.dto.performedService.PerformedServiceUpdateRequestDTO;
+import com.matheusmaciel.comissio.core.model.access.User;
+import com.matheusmaciel.comissio.core.model.register.*;
+import com.matheusmaciel.comissio.core.repository.*;
+import com.matheusmaciel.comissio.core.service.PerformedServiceService;
 import com.matheusmaciel.comissio.infra.exception.performedService.BusinessRuleException;
 import com.matheusmaciel.comissio.infra.exception.performedService.CommissionRuleNotFoundException;
 import com.matheusmaciel.comissio.infra.exception.performedService.UpdatePerformedServiceException;

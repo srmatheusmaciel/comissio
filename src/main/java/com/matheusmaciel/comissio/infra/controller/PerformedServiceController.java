@@ -1,10 +1,10 @@
 package com.matheusmaciel.comissio.infra.controller;
 
-import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServiceRequestDTO;
-import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServiceResponseDTO;
-import com.matheusmaciel.comissio.core.domain.dto.performedService.PerformedServiceUpdateRequestDTO;
-import com.matheusmaciel.comissio.core.domain.model.register.ServiceStatus;
-import com.matheusmaciel.comissio.core.domain.service.PerformedServiceService;
+import com.matheusmaciel.comissio.core.dto.performedService.PerformedServiceRequestDTO;
+import com.matheusmaciel.comissio.core.dto.performedService.PerformedServiceResponseDTO;
+import com.matheusmaciel.comissio.core.dto.performedService.PerformedServiceUpdateRequestDTO;
+import com.matheusmaciel.comissio.core.model.register.ServiceStatus;
+import com.matheusmaciel.comissio.core.service.PerformedServiceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

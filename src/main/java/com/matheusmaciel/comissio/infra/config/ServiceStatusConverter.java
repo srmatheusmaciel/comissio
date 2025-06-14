@@ -1,6 +1,6 @@
 package com.matheusmaciel.comissio.infra.config;
 
-import com.matheusmaciel.comissio.core.domain.model.register.ServiceStatus;
+import com.matheusmaciel.comissio.core.model.register.ServiceStatus;
 import jakarta.persistence.AttributeConverter;
 
 public class ServiceStatusConverter implements AttributeConverter<ServiceStatus, String> {

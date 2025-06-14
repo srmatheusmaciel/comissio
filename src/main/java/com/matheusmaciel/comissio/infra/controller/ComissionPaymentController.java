@@ -1,10 +1,10 @@
 package com.matheusmaciel.comissio.infra.controller;
 
 
-import com.matheusmaciel.comissio.core.domain.dto.comissionPayment.BatchPaymentRequestDTO;
-import com.matheusmaciel.comissio.core.domain.dto.comissionPayment.BatchPaymentResponseDTO;
-import com.matheusmaciel.comissio.core.domain.dto.comissionPayment.ComissionPaymentResponseDTO;
-import com.matheusmaciel.comissio.core.domain.service.ComissionPaymentService;
+import com.matheusmaciel.comissio.core.dto.comissionPayment.BatchPaymentRequestDTO;
+import com.matheusmaciel.comissio.core.dto.comissionPayment.BatchPaymentResponseDTO;
+import com.matheusmaciel.comissio.core.dto.comissionPayment.ComissionPaymentResponseDTO;
+import com.matheusmaciel.comissio.core.service.ComissionPaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController

@@ -1,10 +1,10 @@
 package com.matheusmaciel.comissio.infra.controller;
 
-import com.matheusmaciel.comissio.core.domain.dto.LoginRequestDTO;
-import com.matheusmaciel.comissio.core.domain.dto.LoginResponseDTO;
-import com.matheusmaciel.comissio.core.domain.dto.UserRequestDTO;
-import com.matheusmaciel.comissio.core.domain.model.access.User;
-import com.matheusmaciel.comissio.core.domain.repository.UserRepository;
+import com.matheusmaciel.comissio.core.dto.LoginRequestDTO;
+import com.matheusmaciel.comissio.core.dto.LoginResponseDTO;
+import com.matheusmaciel.comissio.core.dto.UserRequestDTO;
+import com.matheusmaciel.comissio.core.model.access.User;
+import com.matheusmaciel.comissio.core.repository.UserRepository;
 import com.matheusmaciel.comissio.infra.config.security.TokenService;
 
 import com.matheusmaciel.comissio.infra.exception.BusinessException;
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.matheusmaciel.comissio.core.domain.dto.UserResponseDTO;
+import com.matheusmaciel.comissio.core.dto.UserResponseDTO;
 
 import java.util.Optional;
 

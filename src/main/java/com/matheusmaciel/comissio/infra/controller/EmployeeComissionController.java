@@ -1,8 +1,8 @@
 package com.matheusmaciel.comissio.infra.controller;
 
-import com.matheusmaciel.comissio.core.domain.dto.employeeComission.EmployeeComissionRequestDTO;
-import com.matheusmaciel.comissio.core.domain.dto.employeeComission.EmployeeComissionResponseDTO;
-import com.matheusmaciel.comissio.core.domain.service.EmployeeComissionService;
+import com.matheusmaciel.comissio.core.dto.employeeComission.EmployeeComissionRequestDTO;
+import com.matheusmaciel.comissio.core.dto.employeeComission.EmployeeComissionResponseDTO;
+import com.matheusmaciel.comissio.core.service.EmployeeComissionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

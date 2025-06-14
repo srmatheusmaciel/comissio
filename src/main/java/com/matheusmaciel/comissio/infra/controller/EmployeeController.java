@@ -1,9 +1,9 @@
 package com.matheusmaciel.comissio.infra.controller;
 
-import com.matheusmaciel.comissio.core.domain.dto.employee.EmployeeRequestDTO;
-import com.matheusmaciel.comissio.core.domain.dto.employee.EmployeeResponseDTO;
-import com.matheusmaciel.comissio.core.domain.dto.employee.EmployeeUpdateRequestDTO;
-import com.matheusmaciel.comissio.core.domain.service.EmployeeService;
+import com.matheusmaciel.comissio.core.dto.employee.EmployeeRequestDTO;
+import com.matheusmaciel.comissio.core.dto.employee.EmployeeResponseDTO;
+import com.matheusmaciel.comissio.core.dto.employee.EmployeeUpdateRequestDTO;
+import com.matheusmaciel.comissio.core.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;

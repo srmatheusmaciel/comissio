@@ -1,9 +1,8 @@
 package com.matheusmaciel.comissio.infra.controller;
 
-import com.matheusmaciel.comissio.core.domain.dto.ServiceType.ServiceTypeRequestDTO;
-import com.matheusmaciel.comissio.core.domain.dto.ServiceType.ServiceTypeResponseDTO;
-import com.matheusmaciel.comissio.core.domain.model.register.ServiceType;
-import com.matheusmaciel.comissio.core.domain.service.ServiceTypeService;
+import com.matheusmaciel.comissio.core.dto.ServiceType.ServiceTypeRequestDTO;
+import com.matheusmaciel.comissio.core.dto.ServiceType.ServiceTypeResponseDTO;
+import com.matheusmaciel.comissio.core.service.ServiceTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
