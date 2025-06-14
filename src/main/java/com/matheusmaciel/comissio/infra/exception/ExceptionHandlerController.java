@@ -5,10 +5,15 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import com.matheusmaciel.comissio.infra.exception.dto.ErrorMessageDTO;
+import com.matheusmaciel.comissio.infra.exception.employee.EmployeeFoundException;
 import com.matheusmaciel.comissio.infra.exception.employee.EmployeeNotFoundException;
 import com.matheusmaciel.comissio.infra.exception.performedService.BusinessRuleException;
+import com.matheusmaciel.comissio.infra.exception.performedService.CommissionRuleNotFoundException;
 import com.matheusmaciel.comissio.infra.exception.performedService.UpdatePerformedServiceException;
 
+import com.matheusmaciel.comissio.infra.exception.serviceType.DuplicateResourceException;
+import com.matheusmaciel.comissio.infra.exception.serviceType.ResourceNotFoundException;
+import com.matheusmaciel.comissio.infra.exception.user.UsernameNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -76,15 +81,46 @@ public class ExceptionHandlerController {
         return ResponseEntity.badRequest().body(error);
     }
 
+    @ExceptionHandler({
+            ResourceNotFoundException.class,
+            UsernameNotFoundException.class,
+            CommissionRuleNotFoundException.class
+
+    })
+    public ResponseEntity<Object> handleResourceNotFound(RuntimeException ex, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Not Found");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({
+            UserFoundException.class,
+            EmployeeFoundException.class,
+            DuplicateResourceException.class
+    })
+    public ResponseEntity<Object> handleConflict(RuntimeException ex, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("error", HttpStatus.CONFLICT.getReasonPhrase());
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<Object> handleBusinessRuleException(BusinessRuleException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", HttpStatus.NOT_FOUND.getReasonPhrase());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
         body.put("message", ex.getMessage());
         body.put("path", request.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
 
