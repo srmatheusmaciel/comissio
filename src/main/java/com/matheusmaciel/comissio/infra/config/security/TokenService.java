@@ -22,10 +22,18 @@ public class TokenService {
     public String generateToken(User user) {
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
+
+            var roles = user.getAuthorities()
+                            .stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .collect(Collectors.toList());
+
+            
             String token = JWT.create()
                     .withIssuer("com.matheusmaciel.comissio")
                     .withExpiresAt(genExpirationDate())
                     .withSubject(user.getUsername())
+                    .withClaim("roles", roles)
                     .sign(algorithm);
             return token;
         }
