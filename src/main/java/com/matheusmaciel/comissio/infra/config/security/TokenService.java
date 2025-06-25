@@ -8,6 +8,9 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.matheusmaciel.comissio.core.model.access.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.GrantedAuthority;
+import java.util.stream.Collectors;
+import java.util.List;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
