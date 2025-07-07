@@ -66,4 +66,41 @@ public class EmailService {
 
         sendEmailWithAttachment(toEmail, subject, body, reportFile.content(), reportFile.filename(), reportFile.contentType());
     }
+
+    public void sendPasswordResetEmail(String to, String name, String resetLink){
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject("Comissio - Recuperação de Senha");
+            
+            String htmlContent = String.format("""
+                <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+                    <h2>Recuperação de Senha</h2>
+                    <p>Olá, %s!</p>
+                    <p>Recebemos uma solicitação para redefinir a senha da sua conta no sistema Comissio. Se não foi você, por favor, ignore este e-mail.</p>
+                    <p>Para criar uma nova senha, clique no link abaixo. Ele é válido por 1 hora.</p>
+                    <p style="margin: 25px 0;">
+                        <a href="%s" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                            Redefinir Senha
+                        </a>
+                    </p>
+                    <p>Atenciosamente,<br>Equipe Comissio</p>
+                </div>
+            """, name, resetLink);
+
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+
+
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Erro ao enviar e-mail de recuperação de senha.", e);
+        }
+    }
+
+
 }

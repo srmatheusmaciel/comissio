@@ -32,24 +32,18 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 @Service
 public class ReportService {
 
-    private final PerformedServiceService performedServiceService;
     private final PerformedServiceRepository performedServiceRepository;
-    private final EmployeeService employeeService;
 
-    public ReportService(PerformedServiceService performedServiceService,
-                         PerformedServiceRepository performedServiceRepository,
-                         EmployeeService employeeService) {
-        this.performedServiceService = performedServiceService;
+    public ReportService(PerformedServiceRepository performedServiceRepository) {
         this.performedServiceRepository = performedServiceRepository;
-        this.employeeService = employeeService;
     }
 
     public ReportFile generateIndividualCommisionReportPdf(UUID employeeId,
-                                                       LocalDate startDate,
-                                                       LocalDate endDate) throws IOException {
+                                                        String employeeName,
+                                                        LocalDate startDate,
+                                                        LocalDate endDate) throws IOException {
 
         List<PerformedService> services = performedServiceRepository.findByEmployeeIdAndServiceDateBetween(employeeId, startDate, endDate);
-        EmployeeResponseDTO employee = employeeService.getEmployeeById(employeeId);
 
         BigDecimal totalServicesPrice = BigDecimal.ZERO;
         BigDecimal totalCommissionAmount = BigDecimal.ZERO;
@@ -66,10 +60,11 @@ public class ReportService {
                 PDType1Font fontBold = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
                 PDType1Font fontPlain = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
                 DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                
                 Locale brLocale = new Locale("pt", "BR");
                 NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(brLocale);
 
-                drawPageHeader(contentStream, employee.name(), startDate, endDate, fontBold, fontPlain, dateFormatter);
+                drawPageHeader(contentStream, employeeName, startDate, endDate, fontBold, fontPlain, dateFormatter);
                 drawFooter(contentStream, fontPlain);
 
                 float yPosition = 680;
@@ -132,6 +127,92 @@ public class ReportService {
         return new ReportFile(reportBytes, fileName, contentType);
     }
 
+    public ReportFile generateIndividualCommissionReportExcel(UUID employeeId, LocalDate startDate, LocalDate endDate) throws IOException {
+
+        List<PerformedService> services = performedServiceRepository.findByEmployeeIdAndServiceDateBetween(employeeId, startDate, endDate);
+        byte[] reportBytes;
+
+
+        try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                XSSFSheet sheet = workbook.createSheet("Comissões " + employee.name());
+
+                Font headerFont = workbook.createFont();
+                headerFont.setBold(true);
+                headerFont.setFontHeightInPoints((short) 12);
+                headerFont.setColor(IndexedColors.BLACK.getIndex());
+                CellStyle headerCellStyle = workbook.createCellStyle();
+                headerCellStyle.setFont(headerFont);
+
+
+                CellStyle currencyCellStyle = workbook.createCellStyle();
+                CreationHelper createHelper = workbook.getCreationHelper();
+                currencyCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("#,##0.00"));
+
+                CellStyle dateCellStyle = workbook.createCellStyle();
+                dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/MM/yyyy"));
+
+                Row headerRow = sheet.createRow(0);
+                String[] columns = {"Data Serviço", "Serviço", "Valor Serviço (R$)", "Comissão (R$)", "Status"};
+                for (int i = 0; i < columns.length; i++) {
+                    Cell cell = headerRow.createCell(i);
+                    cell.setCellValue(columns[i]);
+                    cell.setCellStyle(headerCellStyle);
+                }
+
+                int rowNum = 1;
+                for (PerformedService service : services) {
+                    Row row = sheet.createRow(rowNum++);
+
+                    Cell dateCell = row.createCell(0);
+                    dateCell.setCellValue(service.getServiceDate());
+                    dateCell.setCellStyle(dateCellStyle);
+
+                    row.createCell(1).setCellValue(service.getServiceTypeId().getName());
+
+                    Cell priceCell = row.createCell(2);
+                    priceCell.setCellValue(service.getPrice().doubleValue());
+                    priceCell.setCellStyle(currencyCellStyle);
+
+                    Cell comissionCell = row.createCell(3);
+                    comissionCell.setCellValue(service.getComissionAmount().doubleValue());
+                    comissionCell.setCellStyle(currencyCellStyle);
+
+                    String statusText;
+                    switch (service.getStatus()) {
+                        case COMMISSION_PAID:
+                            statusText = "Pago";
+                            break;
+                        case COMMISSION_PENDING:
+                            statusText = "Pendente";
+                            break;
+                        case CANCELLED:
+                            statusText = "Cancelado";
+                            break;
+                        default:
+                            statusText = "N/A";
+                            break;
+                    }
+
+                    row.createCell(4).setCellValue(statusText);
+                }
+
+                for (int i = 0; i < columns.length; i++) {
+                    sheet.autoSizeColumn(i);
+                }
+
+                workbook.write(outputStream);
+                reportBytes = outputStream.toByteArray();
+         }
+
+                String sanitizedEmployeeName = employee.name().replaceAll("[^a-zA-Z0-9.\\-]", "_");
+                String fileName = "comissao_" + sanitizedEmployeeName + ".xlsx";
+                String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                return new ReportFile(reportBytes, fileName, contentType);
+
+            }
+
+    
     private void drawPageHeader(PDPageContentStream contentStream, String employeeName, LocalDate startDate, LocalDate endDate,
                                 PDType1Font fontBold, PDType1Font fontPlain, DateTimeFormatter dateFormatter) throws IOException {
         contentStream.beginText();
@@ -243,104 +324,8 @@ public class ReportService {
 
 
 
-    public ReportFile generateIndividualCommissionReportExcel(UUID employeeId, LocalDate startDate, LocalDate endDate) throws IOException {
 
-        List<PerformedService> services = performedServiceRepository.findByEmployeeIdAndServiceDateBetween(employeeId, startDate, endDate);
-        EmployeeResponseDTO employee = employeeService.getEmployeeById(employeeId);
-
-        byte[] reportBytes;
+}
 
 
-        try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-                XSSFSheet sheet = workbook.createSheet("Comissões " + employee.name());
-
-                Font headerFont = workbook.createFont();
-                headerFont.setBold(true);
-                headerFont.setFontHeightInPoints((short) 12);
-                headerFont.setColor(IndexedColors.BLACK.getIndex());
-                CellStyle headerCellStyle = workbook.createCellStyle();
-                headerCellStyle.setFont(headerFont);
-
-
-                CellStyle currencyCellStyle = workbook.createCellStyle();
-                CreationHelper createHelper = workbook.getCreationHelper();
-                currencyCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("#,##0.00"));
-
-                CellStyle dateCellStyle = workbook.createCellStyle();
-                dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/MM/yyyy"));
-
-                Row headerRow = sheet.createRow(0);
-                String[] columns = {"Data Serviço", "Serviço", "Valor Serviço (R$)", "Comissão (R$)", "Status"};
-                for (int i = 0; i < columns.length; i++) {
-                    Cell cell = headerRow.createCell(i);
-                    cell.setCellValue(columns[i]);
-                    cell.setCellStyle(headerCellStyle);
-                }
-
-                int rowNum = 1;
-                for (PerformedService service : services) {
-                    Row row = sheet.createRow(rowNum++);
-
-                    Cell dateCell = row.createCell(0);
-                    dateCell.setCellValue(service.getServiceDate());
-                    dateCell.setCellStyle(dateCellStyle);
-
-                    row.createCell(1).setCellValue(service.getServiceTypeId().getName());
-
-                    Cell priceCell = row.createCell(2);
-                    priceCell.setCellValue(service.getPrice().doubleValue());
-                    priceCell.setCellStyle(currencyCellStyle);
-
-                    Cell comissionCell = row.createCell(3);
-                    comissionCell.setCellValue(service.getComissionAmount().doubleValue());
-                    comissionCell.setCellStyle(currencyCellStyle);
-
-                    String statusText;
-                    switch (service.getStatus()) {
-                        case COMMISSION_PAID:
-                            statusText = "Pago";
-                            break;
-                        case COMMISSION_PENDING:
-                            statusText = "Pendente";
-                            break;
-                        case CANCELLED:
-                            statusText = "Cancelado";
-                            break;
-                        default:
-                            statusText = "N/A";
-                            break;
-                    }
-
-                    row.createCell(4).setCellValue(statusText);
-                }
-
-                for (int i = 0; i < columns.length; i++) {
-                    sheet.autoSizeColumn(i);
-                }
-
-                workbook.write(outputStream);
-                reportBytes = outputStream.toByteArray();
-         }
-
-                String sanitizedEmployeeName = employee.name().replaceAll("[^a-zA-Z0-9.\\-]", "_");
-                String fileName = "comissao_" + sanitizedEmployeeName + ".xlsx";
-                String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-
-                return new ReportFile(reportBytes, fileName, contentType);
-
-            }
-
-    public ReportFile generateMyCommissionReport(Authentication authentication, LocalDate startDate, LocalDate endDate, String format) throws IOException {
-
-        User authenticatedUser = (User) authentication.getPrincipal();
-
-        Employee employee = employeeService.findByUserId(authenticatedUser.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Nenhum perfil de funcionário encontrado para o usuário logado."));
-
-        if ("excel".equalsIgnoreCase(format)) {
-            return generateIndividualCommissionReportExcel(employee.getId(), startDate, endDate);
-        } else {
-            return generateIndividualCommisionReportPdf(employee.getId(), startDate, endDate);
-        }
-    }
-    }
+    

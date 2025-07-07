@@ -13,6 +13,7 @@ import com.matheusmaciel.comissio.infra.exception.performedService.UpdatePerform
 
 import com.matheusmaciel.comissio.infra.exception.serviceType.DuplicateResourceException;
 import com.matheusmaciel.comissio.infra.exception.serviceType.ResourceNotFoundException;
+import com.matheusmaciel.comissio.infra.exception.user.UserNotFoundException;
 import com.matheusmaciel.comissio.infra.exception.user.UsernameNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +85,8 @@ public class ExceptionHandlerController {
     @ExceptionHandler({
             ResourceNotFoundException.class,
             UsernameNotFoundException.class,
-            CommissionRuleNotFoundException.class
+            CommissionRuleNotFoundException.class,
+            UserNotFoundException.class
 
     })
     public ResponseEntity<Object> handleResourceNotFound(RuntimeException ex, WebRequest request) {
