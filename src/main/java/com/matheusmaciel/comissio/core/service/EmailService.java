@@ -15,12 +15,20 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.mail.SimpleMailMessage;
+
+
 @Service
 public class EmailService {
 
     private final JavaMailSender mailSender;
     private final ReportService reportService;
     private final EmployeeService employeeService;
+
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
+
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -35,7 +43,7 @@ public class EmailService {
                                         byte[] attachmentBytes, String attachmentFilename, String attachmentContentType) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true); // true indica multipart
+            MimeMessageHelper helper = new MimeMessageHelper(message, true); // true indicates multipart
 
             helper.setFrom(fromEmail);
             helper.setTo(to);
@@ -77,6 +85,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom(fromEmail);
+            log.info("Enviando e-mail a partir do endereço: {}", fromEmail);
             helper.setTo(to);
             helper.setSubject("Comissio - Recuperação de Senha");
             
@@ -96,13 +105,30 @@ public class EmailService {
             """, name, resetLink);
 
             helper.setText(htmlContent, true);
-
+            log.info("Iniciando processo de envio de e-mail...");
             mailSender.send(message);
-
+            log.info("E-mail enviado com sucesso!");
 
 
         } catch (MessagingException e) {
+            log.error("Erro ao enviar e-mail", e);
             throw new RuntimeException("Erro ao enviar e-mail de recuperação de senha.", e);
+        }
+    }
+
+    public void sendSimpleTestEmail(String to, String subject, String text) {
+        try {
+            System.out.println("Tentando enviar e-mail de teste simples...");
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail); // O 'fromEmail' vem do seu @Value
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(text);
+            mailSender.send(message);
+            System.out.println("E-mail de teste enviado com sucesso!");
+        } catch (Exception e) {
+            System.err.println("Erro ao enviar e-mail de teste simples: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

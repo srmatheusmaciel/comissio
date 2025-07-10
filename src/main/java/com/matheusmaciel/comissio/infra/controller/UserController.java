@@ -5,6 +5,8 @@ import com.matheusmaciel.comissio.core.dto.LoginResponseDTO;
 import com.matheusmaciel.comissio.core.dto.UserRequestDTO;
 import com.matheusmaciel.comissio.core.model.access.User;
 import com.matheusmaciel.comissio.core.repository.UserRepository;
+import com.matheusmaciel.comissio.core.service.EmailService;
+import com.matheusmaciel.comissio.core.service.UserService;
 import com.matheusmaciel.comissio.infra.config.security.TokenService;
 
 import com.matheusmaciel.comissio.infra.exception.BusinessException;
@@ -30,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.matheusmaciel.comissio.core.dto.UserResponseDTO;
+import com.matheusmaciel.comissio.core.dto.user.ForgotPasswordDTO;
+import com.matheusmaciel.comissio.core.dto.user.ResetPasswordDTO;
 
 import java.util.Optional;
 
@@ -40,14 +44,20 @@ public class UserController {
     private final AuthenticationManager authenticationManager;
     private final UserRepository repository;
     private final TokenService tokenService;
+    private final UserService service;
+    private final EmailService emailService;
 
   public UserController(AuthenticationManager authenticationManager,
                                   UserRepository repository,
-                                  TokenService tokenService) {
+                                  TokenService tokenService,
+                                  UserService service,
+                                  EmailService emailService) {
 
     this.authenticationManager = authenticationManager;
     this.repository = repository;
     this.tokenService = tokenService;
+    this.service = service;
+    this.emailService = emailService;
 
   }
 
@@ -112,6 +122,29 @@ public class UserController {
   public ResponseEntity getAllUsers() {
     return ResponseEntity.ok(this.repository.findAll());
   }
+
+  @PostMapping("/forgot-password")
+  @Operation(summary = "Request password reset", description = "This endpoint requests a password reset for a user")
+  @ApiResponse(responseCode = "200", description = "If the email is valid, a password reset token will be sent to the user")
+  public ResponseEntity forgotPassword(@Valid @RequestBody ForgotPasswordDTO dto) {
+    service.generatePasswordResetToken(dto.email());
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/reset-password")
+  @Operation(summary = "Reset password", description = "This endpoint resets the password for a user")
+  @ApiResponse(responseCode = "200", description = "If the token is valid, the password will be reset")
+  @ApiResponse(responseCode = "400", description = "If the token is invalid, the password will not be reset")
+  public ResponseEntity resetPassword(@Valid @RequestBody ResetPasswordDTO dto) {
+    service.resetPassword(dto.token(), dto.newPassword());
+    return ResponseEntity.ok().build();
+  }
+
+  @GetMapping("/test-email")
+  public ResponseEntity<String> testEmail() {
+    emailService.sendSimpleTestEmail("srmatheusmaciel@gmail.com", "Teste de Conexão Simples", "Este é um e-mail de teste.");
+    return ResponseEntity.ok("Tentativa de envio de e-mail de teste iniciada.");
+}
 
 
 

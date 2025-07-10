@@ -54,7 +54,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
                         //.requestMatchers(HttpMethod.POST, "/users/register").hasRole("ADMIN") // If the register is only for admin
+                        .requestMatchers(HttpMethod.POST, "/users/forgot-password").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/reset-password").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/list").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users/test-email").permitAll()
 
 
                         .requestMatchers(HttpMethod.POST, "/employees").hasRole("ADMIN")
