@@ -1,14 +1,14 @@
 package com.matheusmaciel.comissio.infra.controller;
 
 
+import com.matheusmaciel.comissio.core.dto.employee.EmployeeResponseDTO;
 import com.matheusmaciel.comissio.core.dto.report.ReportFile;
+import com.matheusmaciel.comissio.core.model.access.User;
 import com.matheusmaciel.comissio.core.service.EmailService;
+import com.matheusmaciel.comissio.core.service.EmployeeService;
 import com.matheusmaciel.comissio.core.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,35 +24,34 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/reports")
-@Tag(name = "Reports", description = "Endpoints for generating and downloading reports")
-@SecurityRequirement(name = "jwt_auth")
 public class ReportController {
 
     private final ReportService reportService;
     private final EmailService emailService;
+    private final EmployeeService employeeService;
 
-    public ReportController(ReportService reportService, EmailService emailService) {
-        this.emailService = emailService;
+    public ReportController(ReportService reportService, EmailService emailService, EmployeeService employeeService) {
         this.reportService = reportService;
+        this.emailService = emailService;
+        this.employeeService = employeeService;
     }
 
     @GetMapping("/employees/{employeeId}/commissions")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @Operation(summary = "Gerar relatório de comissão individual para um funcionário")
-    @ApiResponse(responseCode = "200", description = "Relatório gerado com sucesso")
-    @ApiResponse(responseCode = "404", description = "Funcionário não encontrado")
     public ResponseEntity<byte[]> getIndividualCommissionReport(
             @PathVariable UUID employeeId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(defaultValue = "pdf") String format) throws IOException {
 
-        ReportFile reportFile;
+        // Controller busca os dados do funcionário
+        EmployeeResponseDTO employee = employeeService.getEmployeeById(employeeId);
 
+        ReportFile reportFile;
         if ("excel".equalsIgnoreCase(format)) {
-            reportFile = reportService.generateIndividualCommissionReportExcel(employeeId, startDate, endDate);
+            // Passa o nome para o serviço
+            reportFile = reportService.generateIndividualCommissionReportExcel(employeeId, employee.name(), startDate, endDate);
         } else {
-            reportFile = reportService.generateIndividualCommisionReportPdf(employeeId, startDate, endDate);
+            reportFile = reportService.generateIndividualCommissionReportPdf(employeeId, employee.name(), startDate, endDate);
         }
 
         HttpHeaders headers = new HttpHeaders();
@@ -63,16 +62,21 @@ public class ReportController {
     }
 
     @GetMapping("/my-commissions")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'EMPLOYEE')")
-    @Operation(summary = "Gerar relatório de comissão para o funcionário autenticado")
-    @ApiResponse(responseCode = "200", description = "Relatório pessoal gerado com sucesso")
     public ResponseEntity<byte[]> getMyCommissionReport(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(defaultValue = "pdf") String format, Authentication authentication) throws IOException {
+            @RequestParam(defaultValue = "pdf") String format,
+            Authentication authentication) throws IOException {
 
-        ReportFile reportFile = reportService.generateMyCommissionReport(authentication, startDate, endDate, format);
+        User authenticatedUser = (User) authentication.getPrincipal();
+        EmployeeResponseDTO employee = employeeService.findByUserIdAndReturnDto(authenticatedUser.getId());
 
+        ReportFile reportFile;
+        if ("excel".equalsIgnoreCase(format)) {
+            reportFile = reportService.generateIndividualCommissionReportExcel(employee.id(), employee.name(), startDate, endDate);
+        } else {
+            reportFile = reportService.generateIndividualCommissionReportPdf(employee.id(), employee.name(), startDate, endDate);
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(reportFile.contentType()));

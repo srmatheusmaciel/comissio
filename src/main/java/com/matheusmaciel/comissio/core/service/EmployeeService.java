@@ -75,4 +75,10 @@ public class EmployeeService {
     public Optional<Employee> findByUserId(UUID id) {
         return this.employeeRepository.findByUser_Id(id);
     }
+
+    public EmployeeResponseDTO findByUserIdAndReturnDto(UUID userId) {
+        return employeeRepository.findByUser_Id(userId)
+                .map(EmployeeResponseDTO::fromEntity)
+                .orElseThrow(() -> new EmployeeNotFoundException("Funcionário não encontrado para o usuário com ID: " + userId));
+    }
 }

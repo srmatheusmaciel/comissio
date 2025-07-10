@@ -1,9 +1,11 @@
 package com.matheusmaciel.comissio.core.service;
 
+import com.matheusmaciel.comissio.core.dto.employee.EmployeeResponseDTO;
 import com.matheusmaciel.comissio.core.dto.report.ReportFile;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -18,11 +20,13 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final ReportService reportService;
+    private final EmployeeService employeeService;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    public EmailService(JavaMailSender mailSender, ReportService reportService) {
+    public EmailService(JavaMailSender mailSender, ReportService reportService,@Lazy EmployeeService employeeService) {
+        this.employeeService = employeeService;
         this.mailSender = mailSender;
         this.reportService = reportService;
     }
@@ -51,17 +55,17 @@ public class EmailService {
 
     public void sendCommissionReportByEmail(String toEmail, UUID employeeId,
                                             LocalDate startDate, LocalDate endDate, String format) throws IOException {
-        ReportFile reportFile;
-        String subject = "Seu Relatório de Comissões - Período: " + startDate + " a " + endDate;
-        String body = "Olá, segue em anexo o seu relatório de comissões.";
 
+        EmployeeResponseDTO employee = employeeService.getEmployeeById(employeeId);
+
+        ReportFile reportFile;
+        String subject = "Seu Relatório de Comissões - " + employee.name();
+        String body = "Olá, " + employee.name() + "! Segue em anexo o seu relatório de comissões.";
 
         if ("excel".equalsIgnoreCase(format)) {
-            reportFile = reportService.generateIndividualCommissionReportExcel(employeeId, startDate, endDate);
-
+            reportFile = reportService.generateIndividualCommissionReportExcel(employeeId, employee.name(), startDate, endDate);
         } else {
-            reportFile = reportService.generateIndividualCommisionReportPdf(employeeId, startDate, endDate);
-
+            reportFile = reportService.generateIndividualCommissionReportPdf(employeeId, employee.name(), startDate, endDate);
         }
 
         sendEmailWithAttachment(toEmail, subject, body, reportFile.content(), reportFile.filename(), reportFile.contentType());
